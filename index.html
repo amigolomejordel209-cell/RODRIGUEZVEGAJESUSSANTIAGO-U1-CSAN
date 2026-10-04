@@ -30,7 +30,7 @@
     </div>
 
     <!-- Contenido del Portafolio (Oculto por defecto) -->
-    <div id="portfolio-container" class="container hidden">
+  <div id="portfolio-container" class="container hidden">
         <header>
             <h1>Portafolio de Evidencias</h1>
             <button id="logout-btn">Cerrar Sesión</button>
@@ -39,41 +39,39 @@
         <main>
             <section id="herramientas">
                 <h2>1. Justificación de las herramientas seleccionadas para la protección de datos</h2>
-<p>Para garantizar la integridad, confidencialidad y disponibilidad de la información en el desarrollo y despliegue de plataformas para entornos virtuales y negocios digitales, se ha establecido un esquema de seguridad basado en las siguientes herramientas:</p>
-<ul>
-    <li><strong>Cifrado AES-256 (Advanced Encryption Standard):</strong> Se seleccionó como estándar de cifrado simétrico para proteger los datos en reposo (como bases de datos e información de clientes). Su longitud de clave de 256 bits lo hace matemáticamente invulnerable a los ataques de fuerza bruta actuales.</li>
-    <li><strong>Funciones Hash SHA-256:</strong> Implementado estrictamente para el almacenamiento de contraseñas y validación de integridad de archivos. Al ser una función unidireccional, asegura que en caso de una filtración, las credenciales originales de los usuarios no puedan ser recuperadas.</li>
-    <li><strong>Gestión de Identidades y Accesos (Firebase Auth):</strong> Herramienta seleccionada para manejar la autenticación. Previene ataques de enumeración de usuarios mediante el manejo de errores genéricos e implementa protocolos seguros de manejo de sesiones con tokens rotativos, mitigando el robo de credenciales.</li>
-</ul>
+                <p>Para garantizar la integridad, confidencialidad y disponibilidad de la información en el desarrollo y despliegue de plataformas para entornos virtuales y negocios digitales, se ha establecido un esquema de seguridad basado en las siguientes herramientas:</p>
+                <ul>
+                    <li><strong>Cifrado AES-256 (Advanced Encryption Standard):</strong> Se seleccionó como estándar de cifrado simétrico para proteger los datos en reposo (como bases de datos e información de clientes). Su longitud de clave de 256 bits lo hace matemáticamente invulnerable a los ataques de fuerza bruta actuales.</li>
+                    <li><strong>Funciones Hash SHA-256:</strong> Implementado estrictamente para el almacenamiento de contraseñas y validación de integridad de archivos. Al ser una función unidireccional, asegura que en caso de una filtración, las credenciales originales de los usuarios no puedan ser recuperadas.</li>
+                    <li><strong>Gestión de Identidades y Accesos (Firebase Auth):</strong> Herramienta seleccionada para manejar la autenticación. Previene ataques de enumeración de usuarios mediante el manejo de errores genéricos e implementa protocolos seguros de manejo de sesiones con tokens rotativos, mitigando el robo de credenciales.</li>
+                </ul>
             </section>
             
             <section id="protocolos">
-               <h2>2. Pruebas de protocolos para el intercambio de información segura</h2>
-<p>El intercambio de datos en tránsito es uno de los vectores más vulnerables. Para evitar ataques de intermediario (Man-in-the-Middle) e intercepciones, se implementaron y probaron los siguientes protocolos:</p>
-<ul>
-    <li><strong>HTTPS sobre TLS 1.3:</strong> Se estableció como protocolo obligatorio para todas las peticiones web. 
-        <br><em>Prueba de validación:</em> Al acceder al sitio web alojado, el analizador de red confirma que el "handshake" criptográfico se realiza en milisegundos y todo el tráfico de carga útil se transmite en texto cifrado. Se bloquean automáticamente las peticiones HTTP por el puerto 80, forzando la redirección al puerto 443 (Secure).
-    </li>
-    <li><strong>SSH (Secure Shell) y claves RSA:</strong> Protocolo empleado para la administración remota de los repositorios y servidores de despliegue.
-        <br><em>Prueba de validación:</em> Se deshabilitó la autenticación tradicional por contraseña en el servidor. La conexión solo se establece exitosamente cuando el cliente presenta una clave privada RSA válida que matemáticamente corresponde a la clave pública autorizada en el servidor, garantizando que solo los administradores legítimos tengan acceso al entorno de producción.
-    </li>
-</ul>
+                <h2>2. Pruebas de protocolos para el intercambio de información segura</h2>
+                <p>El intercambio de datos en tránsito es uno de los vectores más vulnerables. Para evitar ataques de intermediario (Man-in-the-Middle) e intercepciones, se implementaron y probaron los siguientes protocolos:</p>
                 
+                <div class="terminal">
+                    <p><strong>> Protocolo HTTPS sobre TLS 1.3:</strong> Se estableció como obligatorio para todas las peticiones web.</p>
+                    <p style="margin-left: 15px; color: #a0a0a0;"><em>Prueba de validación:</em> Al acceder al sitio web alojado, el analizador de red confirma que el "handshake" criptográfico se realiza en milisegundos y todo el tráfico de carga útil se transmite en texto cifrado. Se bloquean automáticamente las peticiones HTTP por el puerto 80, forzando la redirección al puerto 443 (Secure).</p>
+                    <br>
+                    <p><strong>> Protocolo SSH (Secure Shell) y claves RSA:</strong> Empleado para la administración remota de los repositorios y servidores de despliegue.</p>
+                    <p style="margin-left: 15px; color: #a0a0a0;"><em>Prueba de validación:</em> Se deshabilitó la autenticación tradicional por contraseña en el servidor. La conexión solo se establece exitosamente cuando el cliente presenta una clave privada RSA válida que matemáticamente corresponde a la clave pública autorizada en el servidor, garantizando que solo los administradores legítimos tengan acceso al entorno de producción.</p>
+                </div>
             </section>
             
             <section id="certificados">
-             <h2>3. Certificados digitales</h2>
-<p>El certificado digital funciona como el documento de identidad del servidor, garantizando a los clientes que se están conectando al sistema legítimo y no a una plataforma suplantada.</p>
-<ul>
-    <li><strong>Estándar X.509:</strong> El sistema utiliza certificados digitales basados en el estándar X.509 emitidos por una Autoridad Certificadora (CA) de confianza.</li>
-    <li><strong>Estructura del Certificado:</strong> Contiene la clave pública del servidor, el dominio autorizado, el periodo de validez y la firma criptográfica de la CA. Esta cadena de confianza permite al navegador del usuario verificar la autenticidad del sitio de forma transparente.</li>
-    <li><strong>Validación visual y técnica:</strong> Como evidencia de la implementación, el navegador despliega el indicador de seguridad (candado). Al inspeccionar los detalles, se confirma que la huella digital (Thumbprint) coincide con la emitida por la autoridad y el algoritmo de firma utilizado es seguro (ej. SHA-256 con cifrado RSA).</li>
-</ul>
+                <h2>3. Certificados digitales</h2>
+                <p>El certificado digital funciona como el documento de identidad del servidor, garantizando a los clientes que se están conectando al sistema legítimo y no a una plataforma suplantada.</p>
                 
+                <div class="certificado-box">
+                    <p><strong>Estándar X.509:</strong> El sistema utiliza certificados digitales basados en el estándar X.509 emitidos por una Autoridad Certificadora (CA) de confianza.</p>
+                    <p><strong>Estructura del Certificado:</strong> Contiene la clave pública del servidor, el dominio autorizado, el periodo de validez y la firma criptográfica de la CA. Esta cadena de confianza permite al navegador del usuario verificar la autenticidad del sitio de forma transparente.</p>
+                    <p><strong>Validación visual y técnica:</strong> Como evidencia de la implementación, el navegador despliega el indicador de seguridad (candado). Al inspeccionar los detalles, se confirma que la huella digital (Thumbprint) coincide con la emitida por la autoridad y el algoritmo de firma utilizado es seguro (ej. SHA-256 con cifrado RSA).</p>
+                </div>
             </section>
         </main>
-    
-
+    </div>
     <!-- Firebase SDK (Modular) -->
     <script type="module" src="app.js"></script>
 </body>

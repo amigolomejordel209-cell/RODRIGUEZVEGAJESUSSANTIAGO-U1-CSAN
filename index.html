@@ -58,19 +58,21 @@
         <br><em>Prueba de validación:</em> Se deshabilitó la autenticación tradicional por contraseña en el servidor. La conexión solo se establece exitosamente cuando el cliente presenta una clave privada RSA válida que matemáticamente corresponde a la clave pública autorizada en el servidor, garantizando que solo los administradores legítimos tengan acceso al entorno de producción.
     </li>
 </ul>
-                </div>
+                
             </section>
             
             <section id="certificados">
-                <h2>3. Certificados digitales</h2>
-                <div class="certificado-box">
-                    <p><strong>Emisor:</strong> Autoridad Certificadora Local</p>
-                    <p><strong>Estándar:</strong> X.509</p>
-                    <p><strong>Huella SHA-256:</strong> 9b74c9897bac770ffc029102a200c5de...</p>
-                </div>
+             <h2>3. Certificados digitales</h2>
+<p>El certificado digital funciona como el documento de identidad del servidor, garantizando a los clientes que se están conectando al sistema legítimo y no a una plataforma suplantada.</p>
+<ul>
+    <li><strong>Estándar X.509:</strong> El sistema utiliza certificados digitales basados en el estándar X.509 emitidos por una Autoridad Certificadora (CA) de confianza.</li>
+    <li><strong>Estructura del Certificado:</strong> Contiene la clave pública del servidor, el dominio autorizado, el periodo de validez y la firma criptográfica de la CA. Esta cadena de confianza permite al navegador del usuario verificar la autenticidad del sitio de forma transparente.</li>
+    <li><strong>Validación visual y técnica:</strong> Como evidencia de la implementación, el navegador despliega el indicador de seguridad (candado). Al inspeccionar los detalles, se confirma que la huella digital (Thumbprint) coincide con la emitida por la autoridad y el algoritmo de firma utilizado es seguro (ej. SHA-256 con cifrado RSA).</li>
+</ul>
+                
             </section>
         </main>
-    </div>
+    
 
     <!-- Firebase SDK (Modular) -->
     <script type="module" src="app.js"></script>

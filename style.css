@@ -76,7 +76,7 @@ body::before {
     left: 0; 
     width: 100vw; 
     height: 300vh; /* Altura extra para la animación de caída */
-    z-index: -1; /* Lo pone detrás de todo tu contenido */
+    z-index: 0; /* CORREGIDO: Lo pone sobre el fondo base, pero detrás del contenido */
     opacity: 0.15; /* Sutil para no opacar tus tarjetas. Súbelo si quieres que se note más */
     pointer-events: none; /* Evita que interfiera con los clics en la página */
     
@@ -100,6 +100,8 @@ body::before {
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
+    position: relative; /* CORREGIDO: Necesario para que el z-index funcione */
+    z-index: 1;         /* CORREGIDO: Mantiene todo el portafolio por encima de la lluvia Matrix */
     animation: fadeUp 0.6s ease-out forwards;
 }
 

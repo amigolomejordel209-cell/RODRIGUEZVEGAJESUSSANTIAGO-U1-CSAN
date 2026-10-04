@@ -35,12 +35,33 @@ const errorMessage = document.getElementById('error-message');
 // ==========================================
 // 1. VALIDACIÓN DE SEGURIDAD DE CONTRASEÑA
 // ==========================================
+
 function isPasswordSecure(password) {
-    // Acepta mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número y cualquier carácter especial (incluyendo #)
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return strongPasswordRegex.test(password);
 }
 
+// 2. Manejo del formulario de login
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!isPasswordSecure(password)) {
+        // Texto actualizado que ya incluye el símbolo #
+        errorMessage.textContent = "La contraseña debe tener mínimo 8 caracteres, mayúscula, número y un carácter especial (como #, $, !, @, etc.).";
+        return;
+    }
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+            errorMessage.textContent = "";
+        })
+        .catch((error) => {
+            console.error("Error de Firebase:", error.code, error.message);
+            errorMessage.textContent = "Credenciales inválidas. Acceso denegado.";
+        });
+});
 // ==========================================
 // 2. TIMEOUT DE SESIÓN POR INACTIVIDAD (10 min)
 // ==========================================

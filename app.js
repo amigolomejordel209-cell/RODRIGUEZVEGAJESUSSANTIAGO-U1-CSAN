@@ -3,12 +3,13 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 
 // ⚠️ REEMPLAZA ESTO CON LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
+  authDomain: "ciberseguridad-seguro.firebaseapp.com",
+  projectId: "ciberseguridad-seguro",
+  storageBucket: "ciberseguridad-seguro.firebasestorage.app",
+  messagingSenderId: "663517874892",
+  appId: "1:663517874892:web:75bbf43a2fd872ba6b5069",
+  measurementId: "G-SJ5V3H7PE6"
 };
 
 // Inicializar Firebase

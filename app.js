@@ -36,8 +36,8 @@ const errorMessage = document.getElementById('error-message');
 // 1. VALIDACIÓN DE SEGURIDAD DE CONTRASEÑA
 // ==========================================
 function isPasswordSecure(password) {
-    // Mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // Acepta mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número y cualquier carácter especial (incluyendo #)
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return strongPasswordRegex.test(password);
 }
 

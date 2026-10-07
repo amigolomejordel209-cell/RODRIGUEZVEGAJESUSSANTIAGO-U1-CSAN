@@ -40,6 +40,15 @@ const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
 
 // ==========================================
+// 0. ANTI-CLICKJACKING (Frame Busting)
+// ==========================================
+if (window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+// ... (resto de tu código app.js igualito)
+// ==========================================
 // 1. VALIDACIÓN DE SEGURIDAD DE CONTRASEÑA
 // ==========================================
 function isPasswordSecure(password) {

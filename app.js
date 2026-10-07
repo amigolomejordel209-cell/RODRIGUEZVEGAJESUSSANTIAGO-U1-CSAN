@@ -39,6 +39,29 @@ const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
 
+// Descifrar con AES-256-GCM Real
+export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    // La clave debe ser de 32 bytes (256 bits)
+    const keyData = encoder.encode(secretKey.padEnd(32, '0').slice(0, 32)); 
+    
+    const cryptoKey = await window.crypto.subtle.importKey(
+        'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
+    );
+
+    // Convertimos la base64 que viene de la base de datos a un formato que el navegador entienda
+    const ciphertext = new Uint8Array(atob(ciphertextBase64).split('').map(c => c.charCodeAt(0)));
+    const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
+
+    // Desciframos
+    const decryptedBuffer = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
+    );
+
+    // Devolvemos el texto HTML en texto plano
+    return decoder.decode(decryptedBuffer);
+}
 // ==========================================
 // 0. ANTI-CLICKJACKING (Frame Busting)
 // ==========================================

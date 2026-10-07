@@ -1,3 +1,10 @@
+// ==========================================
+// 0. ANTI-CLICKJACKING (Frame Busting)
+// ==========================================
+if (window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -39,38 +46,6 @@ const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
 
-// Descifrar con AES-256-GCM Real
-export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-    // La clave debe ser de 32 bytes (256 bits)
-    const keyData = encoder.encode(secretKey.padEnd(32, '0').slice(0, 32)); 
-    
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
-    );
-
-    // Convertimos la base64 que viene de la base de datos a un formato que el navegador entienda
-    const ciphertext = new Uint8Array(atob(ciphertextBase64).split('').map(c => c.charCodeAt(0)));
-    const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
-
-    // Desciframos
-    const decryptedBuffer = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
-    );
-
-    // Devolvemos el texto HTML en texto plano
-    return decoder.decode(decryptedBuffer);
-}
-// ==========================================
-// 0. ANTI-CLICKJACKING (Frame Busting)
-// ==========================================
-if (window.top !== window.self) {
-    window.top.location = window.self.location;
-}
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-// ... (resto de tu código app.js igualito)
 // ==========================================
 // 1. VALIDACIÓN DE SEGURIDAD DE CONTRASEÑA
 // ==========================================
@@ -98,7 +73,6 @@ loginForm.addEventListener('submit', (e) => {
         })
         .catch((error) => {
             console.warn("Intento de acceso fallido:", error.code);
-            // Protección contra enumeración de usuarios: Mensaje uniforme siempre
             errorMessage.textContent = "Credenciales inválidas. Acceso denegado.";
         });
 });
@@ -122,13 +96,13 @@ document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
 // ==========================================
-// 4. MANEJO DE AUTENTICACIÓN Y MIDDLEWARE FIRESTORE
+// 4. MANEJO DE AUTENTICACIÓN, MIDDLEWARE Y DESCIFRADO
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         // Ocultar pantalla de Login y mostrar estado de carga
         loginContainer.classList.add('hidden');
-        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando datos seguros desde el servidor...</div>';
+        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
         portfolioContainer.classList.remove('hidden');
 
         try {
@@ -137,31 +111,44 @@ onAuthStateChanged(auth, async (user) => {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                // EL MIDDLEWARE APROBÓ LA LECTURA: Inyectar el HTML
-                portfolioContainer.innerHTML = docSnap.data().html;
+                const dbData = docSnap.data();
                 
-                // Asignar evento al botón de cierre de sesión dinámico
-                const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', () => {
-                        signOut(auth);
-                    });
+                try {
+                    // DESENCRIPTAMOS LA INFORMACIÓN QUE VIENE DEL SERVIDOR
+                    const claveMaestra = "AdminCiber2026#"; // Llave secreta del cifrado
+                    
+                    const htmlDescifrado = await decryptAES256(
+                        dbData.ciphertext, // El texto cifrado (basura) de Firestore
+                        dbData.iv,         // El vector de inicialización de Firestore
+                        claveMaestra
+                    );
+
+                    // INYECTAMOS EL HTML DESCIFRADO
+                    portfolioContainer.innerHTML = htmlDescifrado;
+                    
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', () => {
+                            signOut(auth);
+                        });
+                    }
+                    resetInactivityTimer();
+
+                } catch (cryptoError) {
+                    console.error("Error de descifrado:", cryptoError);
+                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
                 }
-                resetInactivityTimer();
             } else {
                 portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
             }
         } catch (error) {
-            // EL MIDDLEWARE RECHAZÓ LA LECTURA
             console.error("Acceso bloqueado por Firebase Security Rules:", error);
             portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 403 Forbidden: Acceso denegado por el servidor.</div>';
         }
     } else {
-        // Destruir por completo el HTML del portafolio (Seguridad contra F12)
+        // Destruir por completo el HTML del portafolio
         portfolioContainer.innerHTML = '';
         portfolioContainer.classList.add('hidden');
-        
-        // Mostrar pantalla de Login
         loginContainer.classList.remove('hidden');
         clearTimeout(inactivityTimer);
     }
@@ -171,7 +158,6 @@ onAuthStateChanged(auth, async (user) => {
 // 5. FUNCIONES CRIPTOGRÁFICAS REALES (Web Crypto API)
 // ==========================================
 
-// Generar Hash SHA-256 Real
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -180,22 +166,73 @@ export async function generateSHA256(text) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Cifrar con AES-256-GCM Real
 export async function encryptAES256(plainText, secretKey) {
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(secretKey.padEnd(32, '0').slice(0, 32)); // Clave de 256 bits
-
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']
-    );
-
-    const iv = window.crypto.getRandomValues(new Uint8Array(12)); // Vector de inicialización
-    const encryptedBuffer = await window.crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv: iv }, cryptoKey, encoder.encode(plainText)
-    );
-
+    const keyData = encoder.encode(secretKey.padEnd(32, '0').slice(0, 32));
+    const cryptoKey = await window.crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encryptedBuffer = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, cryptoKey, encoder.encode(plainText));
     return {
         ciphertext: btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer))),
         iv: btoa(String.fromCharCode(...iv))
     };
 }
+
+export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    const keyData = encoder.encode(secretKey.padEnd(32, '0').slice(0, 32)); 
+    
+    const cryptoKey = await window.crypto.subtle.importKey(
+        'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
+    );
+
+    const ciphertext = new Uint8Array(atob(ciphertextBase64).split('').map(c => c.charCodeAt(0)));
+    const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
+
+    const decryptedBuffer = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
+    );
+
+    return decoder.decode(decryptedBuffer);
+}
+
+// ==========================================
+// SCRIPT TEMPORAL PARA CIFRAR TU PORTAFOLIO 
+// (Borra esto después de subir los datos a Firestore)
+// ==========================================
+setTimeout(async () => {
+    // 1. Pega aquí tu código HTML tal y como quieres que se vea
+    const miPortafolioHTML = `
+        <header class="glass-card">
+            <div class="header-title">
+                <span class="status-badge"><span class="pulse-dot"></span> Sistema Protegido</span>
+                <h1>Portafolio de Evidencias</h1>
+            </div>
+            <button id="logout-btn" class="btn-danger">Cerrar Sesión</button>
+        </header>
+        <main>
+            <section id="herramientas" class="glass-card">
+                <div class="section-header">
+                    <span class="section-number">01</span>
+                    <h2>Justificación de Herramientas</h2>
+                </div>
+                <p class="section-desc">Selección técnica para la protección de datos en reposo y en tránsito dentro de plataformas virtuales:</p>
+                <div class="cards-grid">
+                    <div class="feature-card">
+                        <h3>Cifrado AES-256</h3>
+                        <p>Estándar de cifrado simétrico seleccionado para proteger datos en reposo.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    `; // Reemplaza esto con tu HTML completo de las 3 secciones
+
+    const claveMaestra = "AdminCiber2026#";
+    const resultado = await encryptAES256(miPortafolioHTML, claveMaestra);
+    
+    console.log("=== COPIA ESTO Y PÉGALO EN FIRESTORE ===");
+    console.log("CIPHERTEXT:", resultado.ciphertext);
+    console.log("IV:", resultado.iv);
+    console.log("=========================================");
+}, 2000);

@@ -227,12 +227,3 @@ setTimeout(async () => {
             </section>
         </main>
     `; // Reemplaza esto con tu HTML completo de las 3 secciones
-
-    const claveMaestra = "AdminCiber2026#";
-    const resultado = await encryptAES256(miPortafolioHTML, claveMaestra);
-    
-    console.log("=== COPIA ESTO Y PÉGALO EN FIRESTORE ===");
-    console.log("CIPHERTEXT:", resultado.ciphertext);
-    console.log("IV:", resultado.iv);
-    console.log("=========================================");
-}, 2000);

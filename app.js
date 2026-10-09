@@ -226,4 +226,4 @@ setTimeout(async () => {
                 </div>
             </section>
         </main>
-    `; // Reemplaza esto con tu HTML completo de las 3 secciones
+

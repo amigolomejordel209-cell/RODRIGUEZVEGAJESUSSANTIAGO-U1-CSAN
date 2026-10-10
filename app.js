@@ -1,10 +1,4 @@
-// ==========================================
-// 0. ANTI-CLICKJACKING (Frame Busting)
-// ==========================================
-if (window.top !== window.self) {
-    window.top.location = window.self.location;
-}
-
+// 1. LOS IMPORTS DEBEN IR HASTA ARRIBA (Regla estricta de JS)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,15 +8,22 @@ import {
     setPersistence,
     browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-// IMPORTAMOS FIRESTORE (El Middleware del Servidor)
 import { 
     getFirestore, 
     doc, 
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Configuración Real de Firebase
+// ==========================================
+// 2. ANTI-CLICKJACKING (Frame Busting)
+// ==========================================
+if (window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+
+// ==========================================
+// 3. CONFIGURACIÓN E INICIALIZACIÓN
+// ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
     authDomain: "ciberseguridad-seguro.firebaseapp.com",
@@ -35,35 +36,27 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // Inicializamos la base de datos
+const db = getFirestore(app); 
 
-// Forzar que la sesión se destruya al cerrar la pestaña/navegador
 setPersistence(auth, browserSessionPersistence);
 
-// Elementos DOM
 const loginContainer = document.getElementById('login-container');
 const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
 
-// ==========================================
-// 1. VALIDACIÓN DE SEGURIDAD DE CONTRASEÑA
-// ==========================================
 function isPasswordSecure(password) {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return strongPasswordRegex.test(password);
 }
 
-// ==========================================
-// 2. MANEJO DEL FORMULARIO DE LOGIN
-// ==========================================
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
     if (!isPasswordSecure(password)) {
-        errorMessage.textContent = "La contraseña debe tener mínimo 8 caracteres, mayúscula, número y un carácter especial (como #, $, !, @, etc.).";
+        errorMessage.textContent = "La contraseña debe tener mínimo 8 caracteres, mayúscula, número y un carácter especial.";
         return;
     }
 
@@ -77,9 +70,6 @@ loginForm.addEventListener('submit', (e) => {
         });
 });
 
-// ==========================================
-// 3. TIMEOUT DE SESIÓN POR INACTIVIDAD (10 min)
-// ==========================================
 let inactivityTimer;
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
@@ -88,7 +78,7 @@ function resetInactivityTimer() {
             alert("Sesión expirada por inactividad por razones de seguridad.");
             signOut(auth);
         }
-    }, 10 * 60 * 1000); // 10 Minutos
+    }, 10 * 60 * 1000);
 }
 
 window.onload = resetInactivityTimer;
@@ -96,68 +86,8 @@ document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
 // ==========================================
-// 4. MANEJO DE AUTENTICACIÓN, MIDDLEWARE Y DESCIFRADO
+// 4. FUNCIONES CRIPTOGRÁFICAS
 // ==========================================
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // Ocultar pantalla de Login y mostrar estado de carga
-        loginContainer.classList.add('hidden');
-        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
-        portfolioContainer.classList.remove('hidden');
-
-        try {
-            // PETICIÓN AL MIDDLEWARE: Solicitar el documento a la base de datos
-            const docRef = doc(db, "portafolio", "secreto");
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const dbData = docSnap.data();
-                
-                try {
-                    // DESENCRIPTAMOS LA INFORMACIÓN QUE VIENE DEL SERVIDOR
-                    const claveMaestra = "AdminCiber2026#"; // Llave secreta del cifrado
-                    
-                    const htmlDescifrado = await decryptAES256(
-                        dbData.ciphertext, // El texto cifrado (basura) de Firestore
-                        dbData.iv,         // El vector de inicialización de Firestore
-                        claveMaestra
-                    );
-
-                    // INYECTAMOS EL HTML DESCIFRADO
-                    portfolioContainer.innerHTML = htmlDescifrado;
-                    
-                    const logoutBtn = document.getElementById('logout-btn');
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', () => {
-                            signOut(auth);
-                        });
-                    }
-                    resetInactivityTimer();
-
-                } catch (cryptoError) {
-                    console.error("Error de descifrado:", cryptoError);
-                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
-                }
-            } else {
-                portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
-            }
-        } catch (error) {
-            console.error("Acceso bloqueado por Firebase Security Rules:", error);
-            portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 403 Forbidden: Acceso denegado por el servidor.</div>';
-        }
-    } else {
-        // Destruir por completo el HTML del portafolio
-        portfolioContainer.innerHTML = '';
-        portfolioContainer.classList.add('hidden');
-        loginContainer.classList.remove('hidden');
-        clearTimeout(inactivityTimer);
-    }
-});
-
-// ==========================================
-// 5. FUNCIONES CRIPTOGRÁFICAS REALES (Web Crypto API)
-// ==========================================
-
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -198,32 +128,52 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
 }
 
 // ==========================================
-// SCRIPT TEMPORAL PARA CIFRAR TU PORTAFOLIO 
-// (Borra esto después de subir los datos a Firestore)
+// 5. MIDDLEWARE FIRESTORE & RENDERIZADO
 // ==========================================
-setTimeout(async () => {
-    // 1. Pega aquí tu código HTML tal y como quieres que se vea
-    const miPortafolioHTML = `
-        <header class="glass-card">
-            <div class="header-title">
-                <span class="status-badge"><span class="pulse-dot"></span> Sistema Protegido</span>
-                <h1>Portafolio de Evidencias</h1>
-            </div>
-            <button id="logout-btn" class="btn-danger">Cerrar Sesión</button>
-        </header>
-        <main>
-            <section id="herramientas" class="glass-card">
-                <div class="section-header">
-                    <span class="section-number">01</span>
-                    <h2>Justificación de Herramientas</h2>
-                </div>
-                <p class="section-desc">Selección técnica para la protección de datos en reposo y en tránsito dentro de plataformas virtuales:</p>
-                <div class="cards-grid">
-                    <div class="feature-card">
-                        <h3>Cifrado AES-256</h3>
-                        <p>Estándar de cifrado simétrico seleccionado para proteger datos en reposo.</p>
-                    </div>
-                </div>
-            </section>
-        </main>
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        loginContainer.classList.add('hidden');
+        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
+        portfolioContainer.classList.remove('hidden');
 
+        try {
+            const docRef = doc(db, "portafolio", "secreto");
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const dbData = docSnap.data();
+                try {
+                    const claveMaestra = "AdminCiber2026#"; 
+                    
+                    const htmlDescifrado = await decryptAES256(
+                        dbData.ciphertext, 
+                        dbData.iv,         
+                        claveMaestra
+                    );
+
+                    portfolioContainer.innerHTML = htmlDescifrado;
+                    
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', () => signOut(auth));
+                    }
+                    resetInactivityTimer();
+
+                } catch (cryptoError) {
+                    console.error("Error de descifrado:", cryptoError);
+                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
+                }
+            } else {
+                portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
+            }
+        } catch (error) {
+            console.error("Acceso bloqueado por Firebase Security Rules:", error);
+            portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 403 Forbidden: Acceso denegado por el servidor.</div>';
+        }
+    } else {
+        portfolioContainer.innerHTML = '';
+        portfolioContainer.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+        clearTimeout(inactivityTimer);
+    }
+});

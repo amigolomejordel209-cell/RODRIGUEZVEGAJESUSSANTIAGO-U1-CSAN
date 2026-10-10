@@ -129,55 +129,6 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
-// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        loginContainer.classList.add('hidden');
-        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
-        portfolioContainer.classList.remove('hidden');
-
-        try {
-            const docRef = doc(db, "portafolio", "secreto");
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const dbData = docSnap.data();
-                try {
-                    const claveMaestra = "AdminCiber2026#"; 
-                    
-                    const htmlDescifrado = await decryptAES256(
-                        dbData.ciphertext, 
-                        dbData.iv,         
-                        claveMaestra
-                    );
-
-                    portfolioContainer.innerHTML = htmlDescifrado;
-                    
-                    const logoutBtn = document.getElementById('logout-btn');
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', () => signOut(auth));
-                    }
-                    resetInactivityTimer();
-
-                } catch (cryptoError) {
-                    console.error("Error de descifrado:", cryptoError);
-                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
-                }
-            } else {
-                portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
-            }
-        } catch (error) {
-            console.error("Acceso bloqueado por Firebase Security Rules:", error);
-            portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 403 Forbidden: Acceso denegado por el servidor.</div>';
-        }
-    } else {
-        portfolioContainer.innerHTML = '';
-        portfolioContainer.classList.add('hidden');
-        loginContainer.classList.remove('hidden');
-        clearTimeout(inactivityTimer);
-    }
-});
-
 // ==========================================
 // SCRIPT TEMPORAL PARA CIFRAR TU PORTAFOLIO REAL
 // ==========================================
@@ -273,3 +224,52 @@ setTimeout(async () => {
             </section>
         </main>
     `;
+
+// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        loginContainer.classList.add('hidden');
+        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
+        portfolioContainer.classList.remove('hidden');
+
+        try {
+            const docRef = doc(db, "portafolio", "secreto");
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const dbData = docSnap.data();
+                try {
+                    const claveMaestra = "AdminCiber2026#"; 
+                    
+                    const htmlDescifrado = await decryptAES256(
+                        dbData.ciphertext, 
+                        dbData.iv,         
+                        claveMaestra
+                    );
+
+                    portfolioContainer.innerHTML = htmlDescifrado;
+                    
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', () => signOut(auth));
+                    }
+                    resetInactivityTimer();
+
+                } catch (cryptoError) {
+                    console.error("Error de descifrado:", cryptoError);
+                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
+                }
+            } else {
+                portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
+            }
+        } catch (error) {
+            console.error("Acceso bloqueado por Firebase Security Rules:", error);
+            portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 403 Forbidden: Acceso denegado por el servidor.</div>';
+        }
+    } else {
+        portfolioContainer.innerHTML = '';
+        portfolioContainer.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+        clearTimeout(inactivityTimer);
+    }
+});

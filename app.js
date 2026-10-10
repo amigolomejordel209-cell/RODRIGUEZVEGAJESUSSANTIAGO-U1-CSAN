@@ -268,7 +268,7 @@ setTimeout(async () => {
                 </div>
             </section>
         </main>
-    `;
+;
     
     const resultado = await encryptAES256(miPortafolioHTML, "AdminCiber2026#");
     

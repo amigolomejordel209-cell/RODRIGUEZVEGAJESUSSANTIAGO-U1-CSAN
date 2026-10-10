@@ -1,4 +1,11 @@
-// 1. LOS IMPORTS DEBEN IR HASTA ARRIBA (Regla estricta de JS)
+// ==========================================
+// 0. ANTI-CLICKJACKING (Frame Busting)
+// ==========================================
+if (window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+
+// 1. IMPORTS
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,16 +21,7 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ==========================================
-// 2. ANTI-CLICKJACKING (Frame Busting)
-// ==========================================
-if (window.top !== window.self) {
-    window.top.location = window.self.location;
-}
-
-// ==========================================
-// 3. CONFIGURACIÓN E INICIALIZACIÓN
-// ==========================================
+// 2. CONFIGURACIÓN E INICIALIZACIÓN
 const firebaseConfig = {
     apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
     authDomain: "ciberseguridad-seguro.firebaseapp.com",
@@ -40,6 +38,7 @@ const db = getFirestore(app);
 
 setPersistence(auth, browserSessionPersistence);
 
+// 3. ELEMENTOS DOM
 const loginContainer = document.getElementById('login-container');
 const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
@@ -50,6 +49,7 @@ function isPasswordSecure(password) {
     return strongPasswordRegex.test(password);
 }
 
+// 4. MANEJO DE LOGIN
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
@@ -85,9 +85,7 @@ window.onload = resetInactivityTimer;
 document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
-// ==========================================
-// 4. FUNCIONES CRIPTOGRÁFICAS
-// ==========================================
+// 5. FUNCIONES CRIPTOGRÁFICAS
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -127,9 +125,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
-// ==========================================
-// 5. MIDDLEWARE FIRESTORE & RENDERIZADO
-// ==========================================
+// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');

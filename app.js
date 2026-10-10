@@ -177,3 +177,99 @@ onAuthStateChanged(auth, async (user) => {
         clearTimeout(inactivityTimer);
     }
 });
+
+// ==========================================
+// SCRIPT TEMPORAL PARA CIFRAR TU PORTAFOLIO REAL
+// ==========================================
+setTimeout(async () => {
+    // Aquí está toooodo tu HTML original
+    const miPortafolioHTML = `
+        <header class="glass-card">
+            <div class="header-title">
+                <span class="status-badge"><span class="pulse-dot"></span> Sistema Protegido AES-256</span>
+                <h1>Portafolio de Evidencias</h1>
+            </div>
+            <button id="logout-btn" class="btn-danger">Cerrar Sesión</button>
+        </header>
+        
+        <main>
+            <!-- Sección 1 -->
+            <section id="herramientas" class="glass-card">
+                <div class="section-header">
+                    <span class="section-number">01</span>
+                    <h2>Justificación de Herramientas</h2>
+                </div>
+                <p class="section-desc">Selección técnica para la protección de datos en reposo y en tránsito dentro de plataformas virtuales:</p>
+                <div class="cards-grid">
+                    <div class="feature-card">
+                        <h3>Cifrado AES-256</h3>
+                        <p>Estándar de cifrado simétrico seleccionado para proteger datos en reposo. Su longitud de clave de 256 bits lo hace invulnerable a ataques de fuerza bruta actuales.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Hash SHA-256</h3>
+                        <p>Implementación unidireccional para el almacenamiento seguro de contraseñas e integridad de archivos, impidiendo la recuperación de credenciales ante filtraciones.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Firebase Auth (IAM)</h3>
+                        <p>Gestión de identidades con prevención de enumeración de usuarios, mensajes de error genéricos y gestión de sesiones mediante tokens rotativos.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Sección 2 -->
+            <section id="protocolos" class="glass-card">
+                <div class="section-header">
+                    <span class="section-number">02</span>
+                    <h2>Pruebas de Protocolos Seguros</h2>
+                </div>
+                <p class="section-desc">Validación técnica contra ataques de intermediario (Man-in-the-Middle):</p>
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="terminal-title">audit_protocols.sh — Bash</span>
+                    </div>
+                    <div class="terminal-body">
+                        <p class="term-line"><span class="term-prompt">sec-admin@node01:~$</span> ./test_security_protocols.sh</p>
+                        <p class="term-success">[OK] Protocolo HTTPS sobre TLS 1.3 forzado.</p>
+                        <p class="term-info">&gt; Handshake criptográfico en 45ms. Peticiones HTTP en Puerto 80 redirigidas a Puerto 443.</p>
+                        <p class="term-success">[OK] Protocolo SSH con llaves RSA-4096.</p>
+                        <p class="term-info">&gt; Autenticación por contraseña deshabilitada. Conexión aceptada mediante validación de clave privada.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Sección 3 -->
+            <section id="certificados" class="glass-card">
+                <div class="section-header">
+                    <span class="section-number">03</span>
+                    <h2>Certificados Digitales</h2>
+                </div>
+                <p class="section-desc">Verificación de la cadena de confianza y autenticidad del servidor:</p>
+                <div class="cert-card">
+                    <div class="cert-header">
+                        <span class="cert-icon">📜</span>
+                        <div>
+                            <h4>Estándar X.509</h4>
+                            <span class="cert-issuer">Emitido por Autoridad Certificadora (CA) de Confianza</span>
+                        </div>
+                    </div>
+                    <div class="cert-details">
+                        <div class="cert-field">
+                            <span class="label">Algoritmo de Firma:</span>
+                            <span class="value">SHA-256 con RSA</span>
+                        </div>
+                        <div class="cert-field">
+                            <span class="label">Huella Digital (SHA-256):</span>
+                            <code class="thumbprint">9B:74:C9:89:7B:AC:77:0F:FC:02:91:02:A2:00:C5:DE</code>
+                        </div>
+                        <div class="cert-field">
+                            <span class="label">Estado de Validación:</span>
+                            <span class="value status-ok">✓ Candado Activo en Navegador (Cifrado Extremo a Extremo)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    `;

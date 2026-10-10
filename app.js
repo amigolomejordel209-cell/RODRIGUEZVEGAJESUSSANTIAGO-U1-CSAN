@@ -115,8 +115,12 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
         'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
     );
 
-    const ciphertext = new Uint8Array(atob(ciphertextBase64).split('').map(c => c.charCodeAt(0)));
-    const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
+    // LIMPIEZA AUTOMÁTICA: Evita el error "InvalidCharacterError" de atob
+    const cleanCiphertext = ciphertextBase64.replace(/['"\s]/g, '');
+    const cleanIv = ivBase64.replace(/['"\s]/g, '');
+
+    const ciphertext = new Uint8Array(atob(cleanCiphertext).split('').map(c => c.charCodeAt(0)));
+    const iv = new Uint8Array(atob(cleanIv).split('').map(c => c.charCodeAt(0)));
 
     const decryptedBuffer = await window.crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: iv }, cryptoKey, ciphertext
@@ -173,6 +177,10 @@ onAuthStateChanged(auth, async (user) => {
         clearTimeout(inactivityTimer);
     }
 });
+
+// ==========================================
+// 7. GENERADOR DE CÓDIGOS (Bórralo cuando termines)
+// ==========================================
 setTimeout(async () => {
     // HTML de prueba muy sencillo para validar
     const miPortafolioHTML = `<div class="glass-card" style="text-align:center; padding:50px;"><h2>¡Desencriptado con Éxito! 🛡️</h2><p>El Cifrado AES-256 está funcionando a la perfección.</p></div>`;

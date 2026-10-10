@@ -177,18 +177,3 @@ onAuthStateChanged(auth, async (user) => {
         clearTimeout(inactivityTimer);
     }
 });
-
-// ==========================================
-// 7. GENERADOR DE CÓDIGOS (Bórralo cuando termines)
-// ==========================================
-setTimeout(async () => {
-    // HTML de prueba muy sencillo para validar
-    const miPortafolioHTML = `<div class="glass-card" style="text-align:center; padding:50px;"><h2>¡Desencriptado con Éxito! 🛡️</h2><p>El Cifrado AES-256 está funcionando a la perfección.</p></div>`;
-    
-    const resultado = await encryptAES256(miPortafolioHTML, "AdminCiber2026#");
-    
-    console.warn("⬇️ COPIA ESTE CIPHERTEXT (sin comillas ni espacios):");
-    console.log(resultado.ciphertext);
-    console.warn("⬇️ COPIA ESTE IV (sin comillas ni espacios):");
-    console.log(resultado.iv);
-}, 2000);

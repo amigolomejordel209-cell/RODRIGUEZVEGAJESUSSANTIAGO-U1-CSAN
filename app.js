@@ -133,7 +133,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');
-        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando y descifrando datos seguros...</div>';
+        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descargando datos seguros de Google Cloud...</div>';
         portfolioContainer.classList.remove('hidden');
 
         try {
@@ -142,27 +142,43 @@ onAuthStateChanged(auth, async (user) => {
 
             if (docSnap.exists()) {
                 const dbData = docSnap.data();
-                try {
-                    const claveMaestra = "AdminCiber2026#"; 
+                
+                // =======================================================
+                // ¡VERDADERO E2EE! La llave se pide mediante un prompt
+                // =======================================================
+                setTimeout(async () => {
+                    const claveMaestra = prompt("🔐 SISTEMA E2EE PROTEGIDO:\nLos datos han sido descargados pero están cifrados.\n\nIngresa la Llave Maestra Criptográfica para visualizarlos:");
                     
-                    const htmlDescifrado = await decryptAES256(
-                        dbData.ciphertext, 
-                        dbData.iv,         
-                        claveMaestra
-                    );
-
-                    portfolioContainer.innerHTML = htmlDescifrado;
-                    
-                    const logoutBtn = document.getElementById('logout-btn');
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', () => signOut(auth));
+                    if (!claveMaestra) {
+                        portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Acceso cancelado: No se proporcionó la llave criptográfica.</div>';
+                        signOut(auth);
+                        return;
                     }
-                    resetInactivityTimer();
 
-                } catch (cryptoError) {
-                    console.error("Error de descifrado:", cryptoError);
-                    portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta o los datos están corruptos.</div>';
-                }
+                    try {
+                        portfolioContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="pulse-dot" style="display:inline-block; margin-right:10px;"></span>Descifrando con AES-256...</div>';
+                        
+                        const htmlDescifrado = await decryptAES256(
+                            dbData.ciphertext, 
+                            dbData.iv,         
+                            claveMaestra
+                        );
+
+                        portfolioContainer.innerHTML = htmlDescifrado;
+                        
+                        const logoutBtn = document.getElementById('logout-btn');
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', () => signOut(auth));
+                        }
+                        resetInactivityTimer();
+
+                    } catch (cryptoError) {
+                        console.error("Error de descifrado:", cryptoError);
+                        portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta. Los datos permanecen bloqueados.</div>';
+                        signOut(auth); // Expulsamos por fallar la llave
+                    }
+                }, 500);
+
             } else {
                 portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';
             }

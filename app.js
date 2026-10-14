@@ -1,4 +1,4 @@
-// 1. IMPORTS
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,14 +14,11 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ==========================================
-// 0. ANTI-CLICKJACKING (Frame Busting)
-// ==========================================
 if (window.top !== window.self) {
     window.top.location = window.self.location;
 }
 
-// 2. CONFIGURACIÓN E INICIALIZACIÓN
+
 const firebaseConfig = {
     apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
     authDomain: "ciberseguridad-seguro.firebaseapp.com",
@@ -38,13 +35,13 @@ const db = getFirestore(app);
 
 setPersistence(auth, browserSessionPersistence);
 
-// 3. ELEMENTOS DOM Y SISTEMA CAPTCHA ANTI-BOTS
+
 const loginContainer = document.getElementById('login-container');
 const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
 
-// --- CREACIÓN DINÁMICA DEL CAPTCHA ---
+
 let captchaAnswer = 0;
 const captchaContainer = document.createElement('div');
 captchaContainer.style.margin = "15px 0";
@@ -75,7 +72,7 @@ captchaInput.required = true;
 captchaContainer.appendChild(captchaLabel);
 captchaContainer.appendChild(captchaInput);
 
-// Insertar el CAPTCHA justo antes del botón de "Autenticar"
+
 const submitBtn = loginForm.querySelector('button');
 if (submitBtn) {
     loginForm.insertBefore(captchaContainer, submitBtn);
@@ -84,14 +81,14 @@ if (submitBtn) {
 }
 
 function refreshCaptcha() {
-    const num1 = Math.floor(Math.random() * 10) + 1; // Número del 1 al 10
-    const num2 = Math.floor(Math.random() * 10) + 1; // Número del 1 al 10
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1; 
     captchaAnswer = num1 + num2;
     captchaLabel.innerHTML = `🛡️ <b>Anti-Bots:</b> ¿Cuánto es ${num1} + ${num2}?`;
     captchaInput.value = '';
 }
 
-// Iniciar el primer CAPTCHA al cargar
+
 refreshCaptcha();
 // ------------------------------------
 
@@ -100,17 +97,17 @@ function isPasswordSecure(password) {
     return strongPasswordRegex.test(password);
 }
 
-// 4. MANEJO DE LOGIN
+
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    // --- VALIDACIÓN DEL CAPTCHA ---
+   
     if (parseInt(captchaInput.value) !== captchaAnswer) {
         errorMessage.textContent = "CAPTCHA incorrecto. Demuestra que eres humano.";
-        refreshCaptcha(); // Cambia los números si se equivoca
-        return; // Detiene el inicio de sesión
+        refreshCaptcha(); 
+        return; 
     }
-    // ------------------------------
+    
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -127,7 +124,7 @@ loginForm.addEventListener('submit', (e) => {
         .catch((error) => {
             console.warn("Intento de acceso fallido:", error.code);
             errorMessage.textContent = "Credenciales inválidas. Acceso denegado.";
-            refreshCaptcha(); // Cambiar CAPTCHA tras un fallo de credenciales
+            refreshCaptcha(); 
         });
 });
 
@@ -146,7 +143,7 @@ window.onload = resetInactivityTimer;
 document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
-// 5. FUNCIONES CRIPTOGRÁFICAS
+
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -189,7 +186,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
-// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');

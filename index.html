@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portafolio de Evidencias - Ciberseguridad</title>
     
-    <!-- 1. Control de Caché Estricto (Previene lectura offline de archivos temporales) -->
+  
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <!-- 2. Prevención de adivinación del tipo MIME -->
+  
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     
-    <!-- 3. Política de Referenciador (Evita fuga de información en URLs) -->
+   
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
-    <!-- 4. Content Security Policy (CSP) ULTRA ESTRICTA -->
-    <!-- Se eliminó 'unsafe-inline' de script-src. Ahora NINGÚN script inyectado funcionará -->
+ 
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' https://www.gstatic.com https://*.firebaseapp.com https://*.googleapis.com;
@@ -36,7 +35,7 @@
 </head>
 <body>
 
-    <!-- Pantalla de Login -->
+  
     <div id="login-container" class="container align-center">
         <div class="login-box glass-card">
             <div class="shield-icon">🔒</div>
@@ -50,7 +49,7 @@
                 </div>
                 <div class="input-group">
                     <label for="password">Contraseña</label>
-                    <!-- autocomplete="current-password" ayuda a que gestores de contraseñas lo manejen de forma segura -->
+                  
                     <input type="password" id="password" placeholder="••••••••••••" autocomplete="current-password" required>
                 </div>
                 <button type="submit" id="login-btn" class="btn-primary">Autenticar Sistema</button>
@@ -59,10 +58,10 @@
         </div>
     </div>
 
-    <!-- Contenedor del Portafolio (Completamente VACÍO en el DOM inicial) -->
+  
     <div id="portfolio-container" class="container hidden"></div>
 
-    <!-- Firebase SDK & Lógica de Seguridad (Único script permitido por la CSP) -->
+ 
     <script type="module" src="app.js"></script>
 </body>
 </html>

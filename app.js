@@ -1,4 +1,4 @@
-// 1. LOS IMPORTS DEBEN IR HASTA ARRIBA (Regla de Oro)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,14 +14,12 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ==========================================
-// 0. ANTI-CLICKJACKING (Frame Busting)
-// ==========================================
+
 if (window.top !== window.self) {
     window.top.location = window.self.location;
 }
 
-// 2. CONFIGURACIÓN E INICIALIZACIÓN
+
 const firebaseConfig = {
     apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
     authDomain: "ciberseguridad-seguro.firebaseapp.com",
@@ -38,7 +36,7 @@ const db = getFirestore(app);
 
 setPersistence(auth, browserSessionPersistence);
 
-// 3. ELEMENTOS DOM
+
 const loginContainer = document.getElementById('login-container');
 const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
@@ -49,7 +47,7 @@ function isPasswordSecure(password) {
     return strongPasswordRegex.test(password);
 }
 
-// 4. MANEJO DE LOGIN
+
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
@@ -115,7 +113,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
         'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
     );
 
-    // LIMPIEZA AUTOMÁTICA
+    
     const cleanCiphertext = ciphertextBase64.replace(/['"\s]/g, '');
     const cleanIv = ivBase64.replace(/['"\s]/g, '');
 
@@ -129,7 +127,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
-// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');
@@ -143,9 +141,7 @@ onAuthStateChanged(auth, async (user) => {
             if (docSnap.exists()) {
                 const dbData = docSnap.data();
                 
-                // =======================================================
-                // ¡VERDADERO E2EE! La llave se pide mediante un prompt
-                // =======================================================
+               
                 setTimeout(async () => {
                     const claveMaestra = prompt("🔐 SISTEMA E2EE PROTEGIDO:\nLos datos han sido descargados pero están cifrados.\n\nIngresa la Llave Maestra Criptográfica para visualizarlos:");
                     
@@ -175,7 +171,7 @@ onAuthStateChanged(auth, async (user) => {
                     } catch (cryptoError) {
                         console.error("Error de descifrado:", cryptoError);
                         portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta. Los datos permanecen bloqueados.</div>';
-                        signOut(auth); // Expulsamos por fallar la llave
+                        signOut(auth); 
                     }
                 }, 500);
 

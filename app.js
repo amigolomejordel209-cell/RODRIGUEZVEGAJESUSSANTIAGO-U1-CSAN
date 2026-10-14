@@ -83,7 +83,7 @@ window.onload = resetInactivityTimer;
 document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
-// 5. FUNCIONES CRIPTOGRÁFICAS
+
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -112,7 +112,6 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     const cryptoKey = await window.crypto.subtle.importKey(
         'raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']
     );
-
     
     const cleanCiphertext = ciphertextBase64.replace(/['"\s]/g, '');
     const cleanIv = ivBase64.replace(/['"\s]/g, '');
@@ -127,7 +126,6 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
-
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');
@@ -141,10 +139,29 @@ onAuthStateChanged(auth, async (user) => {
             if (docSnap.exists()) {
                 const dbData = docSnap.data();
                 
-               
-                setTimeout(async () => {
-                    const claveMaestra = prompt("🔐 SISTEMA E2EE PROTEGIDO:\nLos datos han sido descargados pero están cifrados.\n\nIngresa la Llave Maestra Criptográfica para visualizarlos:");
-                    
+              
+                portfolioContainer.innerHTML = `
+                    <div class="glass-card" style="text-align:center; padding: 40px; max-width: 500px; margin: 0 auto;">
+                        <h2 style="margin-bottom: 15px;">🔐 SISTEMA E2EE PROTEGIDO</h2>
+                        <p style="margin-bottom: 20px; color: var(--text-muted);">Los datos han sido descargados pero están cifrados.<br>Ingresa la Llave Maestra Criptográfica para visualizarlos:</p>
+                        
+                        <input type="password" id="master-key-input" placeholder="••••••••••••" 
+                               style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; background: rgba(0,0,0,0.5); color: #fff; font-size: 16px; text-align: center; font-family: monospace;">
+                        
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="btn-unlock" class="btn-primary" style="flex: 1;">Desbloquear</button>
+                            <button id="btn-cancel" class="btn-danger" style="flex: 1;">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+
+                const inputKey = document.getElementById('master-key-input');
+                const btnUnlock = document.getElementById('btn-unlock');
+                const btnCancel = document.getElementById('btn-cancel');
+
+                inputKey.focus();
+
+                const procesarLlave = async (claveMaestra) => {
                     if (!claveMaestra) {
                         portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Acceso cancelado: No se proporcionó la llave criptográfica.</div>';
                         signOut(auth);
@@ -173,7 +190,13 @@ onAuthStateChanged(auth, async (user) => {
                         portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error: La llave criptográfica es incorrecta. Los datos permanecen bloqueados.</div>';
                         signOut(auth); 
                     }
-                }, 500);
+                };
+
+                btnUnlock.addEventListener('click', () => procesarLlave(inputKey.value));
+                btnCancel.addEventListener('click', () => procesarLlave(null));
+                inputKey.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') procesarLlave(inputKey.value);
+                });
 
             } else {
                 portfolioContainer.innerHTML = '<div class="glass-card" style="text-align:center; padding: 20px; color: var(--accent-red);">Error 404: Datos no encontrados en el servidor.</div>';

@@ -1,4 +1,4 @@
-
+// 1. IMPORTS
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,12 +14,14 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-
+// ==========================================
+// 0. ANTI-CLICKJACKING (Frame Busting)
+// ==========================================
 if (window.top !== window.self) {
     window.top.location = window.self.location;
 }
 
-
+// 2. CONFIGURACIÓN E INICIALIZACIÓN
 const firebaseConfig = {
     apiKey: "AIzaSyC52urNj1uBsFQhHONyFo87pRf2hN0_m1c",
     authDomain: "ciberseguridad-seguro.firebaseapp.com",
@@ -36,20 +38,80 @@ const db = getFirestore(app);
 
 setPersistence(auth, browserSessionPersistence);
 
-
+// 3. ELEMENTOS DOM Y SISTEMA CAPTCHA ANTI-BOTS
 const loginContainer = document.getElementById('login-container');
 const portfolioContainer = document.getElementById('portfolio-container');
 const loginForm = document.getElementById('login-form');
 const errorMessage = document.getElementById('error-message');
+
+// --- CREACIÓN DINÁMICA DEL CAPTCHA ---
+let captchaAnswer = 0;
+const captchaContainer = document.createElement('div');
+captchaContainer.style.margin = "15px 0";
+captchaContainer.style.padding = "10px";
+captchaContainer.style.background = "rgba(0,0,0,0.3)";
+captchaContainer.style.borderRadius = "8px";
+captchaContainer.style.border = "1px solid #444";
+captchaContainer.style.display = "flex";
+captchaContainer.style.alignItems = "center";
+captchaContainer.style.justifyContent = "space-between";
+
+const captchaLabel = document.createElement('span');
+captchaLabel.style.fontSize = "14px";
+captchaLabel.style.color = "#ccc";
+
+const captchaInput = document.createElement('input');
+captchaInput.type = "number";
+captchaInput.placeholder = "?";
+captchaInput.style.width = "60px";
+captchaInput.style.padding = "8px";
+captchaInput.style.borderRadius = "4px";
+captchaInput.style.border = "1px solid #666";
+captchaInput.style.background = "rgba(255,255,255,0.1)";
+captchaInput.style.color = "#fff";
+captchaInput.style.textAlign = "center";
+captchaInput.required = true;
+
+captchaContainer.appendChild(captchaLabel);
+captchaContainer.appendChild(captchaInput);
+
+// Insertar el CAPTCHA justo antes del botón de "Autenticar"
+const submitBtn = loginForm.querySelector('button');
+if (submitBtn) {
+    loginForm.insertBefore(captchaContainer, submitBtn);
+} else {
+    loginForm.appendChild(captchaContainer);
+}
+
+function refreshCaptcha() {
+    const num1 = Math.floor(Math.random() * 10) + 1; // Número del 1 al 10
+    const num2 = Math.floor(Math.random() * 10) + 1; // Número del 1 al 10
+    captchaAnswer = num1 + num2;
+    captchaLabel.innerHTML = `🛡️ <b>Anti-Bots:</b> ¿Cuánto es ${num1} + ${num2}?`;
+    captchaInput.value = '';
+}
+
+// Iniciar el primer CAPTCHA al cargar
+refreshCaptcha();
+// ------------------------------------
 
 function isPasswordSecure(password) {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return strongPasswordRegex.test(password);
 }
 
-
+// 4. MANEJO DE LOGIN
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    
+    // --- VALIDACIÓN DEL CAPTCHA ---
+    if (parseInt(captchaInput.value) !== captchaAnswer) {
+        errorMessage.textContent = "CAPTCHA incorrecto. Demuestra que eres humano.";
+        refreshCaptcha(); // Cambia los números si se equivoca
+        return; // Detiene el inicio de sesión
+    }
+    // ------------------------------
+
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
@@ -65,6 +127,7 @@ loginForm.addEventListener('submit', (e) => {
         .catch((error) => {
             console.warn("Intento de acceso fallido:", error.code);
             errorMessage.textContent = "Credenciales inválidas. Acceso denegado.";
+            refreshCaptcha(); // Cambiar CAPTCHA tras un fallo de credenciales
         });
 });
 
@@ -83,7 +146,7 @@ window.onload = resetInactivityTimer;
 document.onmousemove = resetInactivityTimer;
 document.onkeypress = resetInactivityTimer;
 
-
+// 5. FUNCIONES CRIPTOGRÁFICAS
 export async function generateSHA256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -126,6 +189,7 @@ export async function decryptAES256(ciphertextBase64, ivBase64, secretKey) {
     return decoder.decode(decryptedBuffer);
 }
 
+// 6. MIDDLEWARE FIRESTORE & RENDERIZADO
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loginContainer.classList.add('hidden');
@@ -139,7 +203,6 @@ onAuthStateChanged(auth, async (user) => {
             if (docSnap.exists()) {
                 const dbData = docSnap.data();
                 
-              
                 portfolioContainer.innerHTML = `
                     <div class="glass-card" style="text-align:center; padding: 40px; max-width: 500px; margin: 0 auto;">
                         <h2 style="margin-bottom: 15px;">🔐 SISTEMA E2EE PROTEGIDO</h2>
